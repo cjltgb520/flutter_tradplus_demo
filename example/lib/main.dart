@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
             itemExtent: 90,
             itemBuilder: (BuildContext context, int index) {
               return ElevatedButton(
-                style: ElevatedButton.styleFrom(primary: Colors.white70),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.white70),
                 onPressed: () {
                   var widget;
                   switch (index) {
