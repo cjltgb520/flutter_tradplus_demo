@@ -11,6 +11,7 @@ export 'package:tradplus_sdk/tp_listener.dart';
 export 'package:tradplus_sdk/tp_interactive.dart';
 export 'package:tradplus_sdk/tp_interactive_view.dart';
 export 'package:tradplus_sdk/ttd_uid2.dart';
+export 'package:tradplus_sdk/tp_result.dart';
 import 'package:tradplus_sdk/tp_listener.dart';
 import 'package:flutter/services.dart';
 

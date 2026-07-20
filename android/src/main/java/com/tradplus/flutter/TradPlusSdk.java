@@ -166,6 +166,10 @@ public class TradPlusSdk {
                         setDefaultConfig(call, result);
                     } else if (call.method.equals("tp_setEventChannel")) {
                         setEventChannel(call, result);
+                    } else if (call.method.equals("tpresult_handleAdUnitId")) {
+                        tpResultHandleAdUnitId(call, result);
+                    } else if (call.method.equals("tpresult_handleMix")) {
+                        tpResultHandleMix(call, result);
                     } else {
                         Log.e("TradPlusLog", "unknown method");
                     }
@@ -200,6 +204,16 @@ public class TradPlusSdk {
     private void clearCache(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
         String unitId = call.argument("adUnitId");
         com.tradplus.ads.open.TradPlusSdk.clearCache(unitId);
+    }
+
+    private void tpResultHandleAdUnitId(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+        List<String> adUnitIds = call.argument("adUnitIds");
+        result.success(new TPResult().handleAdUnitId(adUnitIds));
+    }
+
+    private void tpResultHandleMix(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+        List<Map<String, Object>> mixList = call.argument("mixAdInfoList");
+        result.success(new TPResult().handleMix(mixList));
     }
 
     private void setSegmentMap(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {

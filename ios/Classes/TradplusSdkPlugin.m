@@ -41,6 +41,10 @@ static FlutterMethodChannel *channel;
     {
         [[TTDUID2Manager sharedInstance] handleMethodCall:call result:result];
     }
+    else if([call.method hasPrefix:@"tpresult_"])
+    {
+        [[TradplusSdkManager sharedInstance] handleMethodCall:call result:result];
+    }
     else if([call.method hasPrefix:@"tp_"])
     {
         [[TradplusSdkManager sharedInstance] handleMethodCall:call result:result];

@@ -7,7 +7,13 @@
 
 #import "TradplusSdkManager.h"
 #import <TradPlusAds/TradPlusAds.h>
+#import <TradPlusAds/TradPlusCompareItem.h>
 #import "TradplusSdkPlugin.h"
+
+@interface TradPlus (TPFlutterCompare)
++ (NSArray *)compareWithPlacementArray:(NSArray<NSString *> *)placementArray;
++ (NSArray<TradPlusCompareItem *>*)compareWithItemArray:(NSArray<TradPlusCompareItem *>*)itemArray;
+@end
 
 @interface TradplusSdkManager()<TradPlusAdImpressionDelegate>
 
@@ -132,7 +138,111 @@
     {
          [self setForbidNetworkIdList:call];
     }
+    else if([@"tpresult_handleAdUnitId" isEqualToString:call.method])
+    {
+        [self tpResultHandleAdUnitId:call result:result];
+    }
+    else if([@"tpresult_handleMix" isEqualToString:call.method])
+    {
+        [self tpResultHandleMix:call result:result];
+    }
 
+}
+
+- (void)tpResultHandleAdUnitId:(FlutterMethodCall*)call result:(FlutterResult)result
+{
+    id adUnitIds = call.arguments[@"adUnitIds"];
+    if(adUnitIds == nil || ![adUnitIds isKindOfClass:[NSArray class]])
+    {
+        result(@[]);
+        return;
+    }
+    NSMutableArray<NSString *> *placementArray = [NSMutableArray array];
+    for (id obj in (NSArray *)adUnitIds)
+    {
+        if([obj isKindOfClass:[NSString class]] && [(NSString *)obj length] > 0)
+        {
+            [placementArray addObject:obj];
+        }
+    }
+    if(placementArray.count == 0)
+    {
+        result(@[]);
+        return;
+    }
+    NSArray *sorted = [TradPlus compareWithPlacementArray:placementArray];
+    result(sorted ?: @[]);
+}
+
+- (void)tpResultHandleMix:(FlutterMethodCall*)call result:(FlutterResult)result
+{
+    id mixAdInfoList = call.arguments[@"mixAdInfoList"];
+    if(mixAdInfoList == nil || ![mixAdInfoList isKindOfClass:[NSArray class]])
+    {
+        result(@[]);
+        return;
+    }
+    NSMutableArray<TradPlusCompareItem *> *items = [NSMutableArray array];
+    for (id obj in (NSArray *)mixAdInfoList)
+    {
+        if(![obj isKindOfClass:[NSDictionary class]])
+        {
+            continue;
+        }
+        TradPlusCompareItem *item = [self compareItemFromMixAdInfo:(NSDictionary *)obj];
+        if(item != nil)
+        {
+            [items addObject:item];
+        }
+    }
+    if(items.count == 0)
+    {
+        result(@[]);
+        return;
+    }
+    NSArray<TradPlusCompareItem *> *sortedItems = [TradPlus compareWithItemArray:items];
+    NSMutableArray *resultArray = [NSMutableArray array];
+    for (TradPlusCompareItem *item in sortedItems)
+    {
+        NSDictionary *map = [self mixAdInfoFromCompareItem:item];
+        if(map != nil)
+        {
+            [resultArray addObject:map];
+        }
+    }
+    result(resultArray);
+}
+
+- (TradPlusCompareItem *)compareItemFromMixAdInfo:(NSDictionary *)dict
+{
+    id adUnitId = dict[@"adUnitId"];
+    if([adUnitId isKindOfClass:[NSString class]] && [(NSString *)adUnitId length] > 0)
+    {
+        TradPlusCompareItem *item = [[TradPlusCompareItem alloc] init];
+        item.placementId = adUnitId;
+        return item;
+    }
+    id ecpm = dict[@"ecpm"];
+    if(ecpm != nil && [ecpm isKindOfClass:[NSNumber class]])
+    {
+        TradPlusCompareItem *item = [[TradPlusCompareItem alloc] init];
+        item.price = [ecpm doubleValue];
+        return item;
+    }
+    return nil;
+}
+
+- (NSDictionary *)mixAdInfoFromCompareItem:(TradPlusCompareItem *)item
+{
+    if(item.itemType == TPCompareItemTypePlacementId && item.placementId.length > 0)
+    {
+        return @{@"adUnitId": item.placementId};
+    }
+    if(item.itemType == TPCompareItemTypePrice)
+    {
+        return @{@"ecpm": @(item.price)};
+    }
+    return nil;
 }
 
 - (void) openTradPlusTool

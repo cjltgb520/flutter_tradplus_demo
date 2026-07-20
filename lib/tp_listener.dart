@@ -1,4 +1,5 @@
 import 'package:tradplus_sdk/tradplus_sdk.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 final TPListenerManager = TPListenerCenter();
@@ -32,13 +33,15 @@ class TPListenerCenter {
   TPGlobalAdImpressionListener? globalAdImpressionListener;
 
   TPListenerCenter() {
-    TradplusSdk.eventChannel.receiveBroadcastStream().listen((event) {
-      // 处理来自原生的事件
-      String method = event["method"];
-      Map data = event["data"];
-      print('Received event: $method,data=$data');
-      tpMethodCall(method, data);
-    });
+    // EventChannel 仅 Android 使用（FCM 场景）；iOS 走 MethodChannel 回调
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      TradplusSdk.eventChannel.receiveBroadcastStream().listen((event) {
+        String method = event["method"];
+        Map data = event["data"];
+        print('Received event: $method,data=$data');
+        tpMethodCall(method, data);
+      });
+    }
     TradplusSdk.channel.setMethodCallHandler((MethodCall call) async {
       String method = call.method;
       tpMethodCall(method, call.arguments);
