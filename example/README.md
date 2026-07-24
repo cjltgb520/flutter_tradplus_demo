@@ -2,6 +2,9 @@
 
 Demonstrates how to use the tradplus_sdk plugin.
 
+For the Android multi-Engine lifecycle reproduction, see
+[MULTI_ENGINE_REPRO.md](MULTI_ENGINE_REPRO.md).
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
